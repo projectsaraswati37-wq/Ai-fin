@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { categoryTotal, monthTransactions, totalFor } from './analytics'
+import { categoryTotal, detailTotals, monthTransactions, spendingTotal, totalFor } from './analytics'
 import type { Transaction } from './models'
 
 const transactions: Transaction[] = [
@@ -22,5 +22,15 @@ describe('financial calculations', () => {
   it('calculates category expense totals only', () => {
     expect(categoryTotal(transactions, 'food')).toBe(1250.5)
     expect(categoryTotal(transactions, 'other')).toBe(0)
+  })
+
+  it('keeps investments out of ordinary spending while reducing cash balance', () => {
+    expect(spendingTotal(transactions)).toBe(1250.5)
+    expect(totalFor(transactions, 'expense')).toBe(5250.5)
+  })
+
+  it('groups entries by their purpose or source', () => {
+    const detailed = transactions.map((transaction) => ({ ...transaction, details: transaction.id === 'income' ? 'Salary' : 'Lunch' }))
+    expect(detailTotals(detailed, [{ id: 'food', name: 'Food', icon: 'x', system: true, createdAt: '2026-01-01' }])).toEqual([{ name: 'Salary', amount: 25000 }, { name: 'Lunch', amount: -5250.5 }])
   })
 })
