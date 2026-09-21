@@ -5,6 +5,20 @@ export function totalFor(transactions: Transaction[], type: Transaction['type'])
     .reduce((total, transaction) => total + transaction.amount, 0)
 }
 
+export function spendingTotal(transactions: Transaction[]) {
+  return totalFor(transactions, 'expense') - categoryTotal(transactions, 'investment')
+}
+
+export function detailTotals(transactions: Transaction[], categories: Category[]) {
+  const names = new Map(categories.map((category) => [category.id, category.name]))
+  const totals = new Map<string, number>()
+  transactions.forEach((transaction) => {
+    const detail = transaction.details?.trim() || names.get(transaction.categoryId) || 'Other'
+    totals.set(detail, (totals.get(detail) ?? 0) + (transaction.type === 'income' ? transaction.amount : -transaction.amount))
+  })
+  return [...totals.entries()].map(([name, amount]) => ({ name, amount })).sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+}
+
 export function categoryTotal(transactions: Transaction[], categoryId: string) {
   return totalFor(transactions.filter((transaction) => transaction.categoryId === categoryId), 'expense')
 }

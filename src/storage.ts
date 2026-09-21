@@ -16,3 +16,4 @@ export function loadTransactions(): Transaction[] { return read<Transaction[]>(t
 export function saveTransactions(transactions: Transaction[]) { localStorage.setItem(transactionKey, JSON.stringify(transactions)) }
 export function loadCategories(): Category[] { return read<Category[]>(categoryKey, defaultCategories) }
 export function addTransaction(transaction: Transaction) { saveTransactions([transaction, ...loadTransactions()]) }
+export function deleteTransaction(id: string) { saveTransactions(loadTransactions().filter((transaction) => transaction.id !== id)) }
